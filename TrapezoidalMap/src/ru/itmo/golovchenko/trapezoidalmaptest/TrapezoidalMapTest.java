@@ -129,4 +129,36 @@ public class TrapezoidalMapTest {
 		}
 		Assert.assertTrue(exceptionWas);
 	}
+	
+	@Test
+	public void oneBetweenTwo() throws OverlapingByXException, EqualsXCoordinatesException, InterspectedLinesException {
+
+		TrapezoidalMap map = new TrapezoidalMap();
+		
+		map.checkAndAdd(new Line(new Point(20, 20), new Point(30, 20)));
+		
+		Line line2 = new Line(new Point(10, 10), new Point(40, 10));
+		map.checkAndAdd(line2);
+		
+		Line line3 = new Line(new Point(0, 30), new Point(50, 30));
+		map.checkAndAdd(line3);
+		Trapezoid t = (Trapezoid)map.get(25, 25);
+		Assert.assertNotNull(t.getUpLine());
+	}
+	
+	@Test
+	public void oneAboveTwo() throws OverlapingByXException, EqualsXCoordinatesException, InterspectedLinesException {
+		TrapezoidalMap map = new TrapezoidalMap();
+		
+		map.checkAndAdd(new Line(new Point(10, 10), new Point(30, 10)));
+		
+		Line line2 = new Line(new Point(20, 0), new Point(40, 0));
+		map.checkAndAdd(line2);
+		
+		Line line3 = new Line(new Point(0, 20), new Point(50, 20));
+		map.checkAndAdd(line3);
+		
+		Trapezoid t = (Trapezoid)map.get(15, 15);
+		Assert.assertNotNull(t.getUpLine());
+	}
 }

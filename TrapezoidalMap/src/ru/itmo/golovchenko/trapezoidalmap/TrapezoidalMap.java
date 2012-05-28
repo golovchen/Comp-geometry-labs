@@ -139,7 +139,7 @@ public class TrapezoidalMap implements Iterable<Trapezoid> {
 			if (oldTrapezoid.getLeftPoint().upOrRight.mapNode.equals(oldTrapezoid)) {
 				oldTrapezoid.getLeftPoint().upOrRight = isLeft ? sideTrapezoid : linedTrapezoid;
 			} else if (oldTrapezoid.getLeftPoint().down.mapNode.equals(oldTrapezoid)) {
-				oldTrapezoid.getLeftPoint().upOrRight = isLeft ? sideTrapezoid : linedTrapezoid;
+				oldTrapezoid.getLeftPoint().down = isLeft ? sideTrapezoid : linedTrapezoid;
 			}
 		}
 		
@@ -218,7 +218,7 @@ public class TrapezoidalMap implements Iterable<Trapezoid> {
 					point.down = up;
 					break;
 				case 0 :
-					if (line.compareTo(point2) < 0) {
+					if (line.compareTo(point2) >= 0) {
 						point.down = down;
 					} else {
 						point.upOrRight = up;
@@ -245,8 +245,8 @@ public class TrapezoidalMap implements Iterable<Trapezoid> {
 	}
 	
 	private static boolean isPointAboveLine(Line line, Point point, Point secondaryPoint) {
-		int compared = line.compareTo(point);
-		return compared == 0 ? (line.compareTo(secondaryPoint) < 0) : (compared == 1);
+		int compared = -line.compareTo(point);
+		return compared == 0 ? (line.compareTo(secondaryPoint) >= 0) : (compared == 1);
 	}
 	
 	private TreeNode get(Point position, Point secondaryPosition) {
@@ -267,17 +267,17 @@ public class TrapezoidalMap implements Iterable<Trapezoid> {
 			} else if (node.mapNode instanceof Line) {
 				Line line = (Line) node.mapNode;
 				switch (line.compareTo(position)) {
-					case 1 :
+					case -1 :
 						node = node.right;
 						break;
-					case -1 :
+					case 1 :
 						node = node.left;
 						break;
 					case 0 :
 						if (secondaryPosition == null) {
 							return node;
 						} else {
-							node = line.compareTo(secondaryPosition) == 1 ? node.right : node.left;
+							node = line.compareTo(secondaryPosition) == -1 ? node.right : node.left;
 						}
 				}
 			}

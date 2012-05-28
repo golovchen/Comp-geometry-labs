@@ -59,7 +59,7 @@ public class Line implements MapNode, Comparable<Point> {
 		Point a = new Point(right.x - left.x, right.y - left.y);
 		Point b = new Point(point.x - left.x, point.y - left.y);
 		long rotate = (long)a.x * b.y - (long)a.y * b.x;
-		return rotate > 0 ? 1 : (rotate == 0 ? 0 : -1);
+		return rotate > 0 ? -1 : (rotate == 0 ? 0 : 1);
 	}
 	
 	@Override

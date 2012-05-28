@@ -7,8 +7,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,9 +26,10 @@ public class Drawer extends JPanel {
 	private TrapezoidalMap map = null;
 	private Point holdPoint  = null;
 	private static final Color ACTIVE_COLOR = Color.GREEN;
+	private static final Color HORISONTAL_COLOR = Color.RED;
+	private static final Color VERTICAL_COLOR = Color.BLUE;
 	
 	public Drawer() {
-		super();
 		addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
 				mouseMoved(e);
@@ -78,18 +77,12 @@ public class Drawer extends JPanel {
 		
 		Iterator<Trapezoid> iter = map.iterator();
 		while (iter.hasNext()) {
-			Trapezoid trapezoid = iter.next();
-			//TODO: fix intersection check.
-			//if (isIntersect(trapezoid, screen)) {
-				g.setColor(new Color(trapezoid.hashCode() * 524287 / 256));
-				drawTrapezoid(trapezoid, g, screen);
-			//}
+			drawTrapezoid(iter.next(), g, screen, false);
 		}
-		
-		g.setColor(ACTIVE_COLOR);
+
 		MapNode node = map.get(point);
 		if (node instanceof Trapezoid) {
-			drawTrapezoid((Trapezoid)node, g, screen);
+			drawTrapezoid((Trapezoid)node, g, screen, true);
 		} else if (node instanceof Line) {
 			drawLine((Line)node, g);
 		} else {
@@ -98,6 +91,7 @@ public class Drawer extends JPanel {
 	}
 	
 	private void drawLine(Line line, Graphics graphics) {
+		graphics.setColor(ACTIVE_COLOR);
 		Line realLine = new Line(realCoordinate(line.left), realCoordinate(line.right));
 		graphics.drawLine(realLine.left.x, realLine.left.y, realLine.right.x, realLine.right.y);
 		drawPoint(line.left, graphics);
@@ -105,19 +99,30 @@ public class Drawer extends JPanel {
 	}
 	
 	private void drawPoint(Point point, Graphics graphics) {
+		graphics.setColor(ACTIVE_COLOR);
 		point = realCoordinate(point);
 		graphics.fillOval(point.x - 3, point.y - 3, 6, 6);
 	}
 	
-	private void drawTrapezoid(Trapezoid trapezoid, Graphics graphics, Trapezoid screen) {
+	private void drawTrapezoid(Trapezoid trapezoid, Graphics graphics, Trapezoid screen, boolean active) {
 		Point[] points = realPoints(trapezoid, screen);
-		int[] xs = new int[points.length];
-		int[] ys = new int[points.length];
-		for (int i = 0; i < points.length; i++) {
-			xs[i] = points[i].x;
-			ys[i] = points[i].y;
+		if (active) {
+			int[] xs = new int[points.length];
+			int[] ys = new int[points.length];
+			for (int i = 0; i < points.length; i++) {
+				xs[i] = points[i].x;
+				ys[i] = points[i].y;
+			}
+			graphics.setColor(ACTIVE_COLOR);
+			graphics.fillPolygon(xs, ys, points.length);
+		} else {
+			graphics.setColor(VERTICAL_COLOR);
+			graphics.drawLine(points[0].x, points[0].y, points[1].x, points[1].y);
+			graphics.drawLine(points[2].x, points[2].y, points[3].x, points[3].y);
+			graphics.setColor(HORISONTAL_COLOR);
+			graphics.drawLine(points[1].x, points[1].y, points[2].x, points[2].y);
+			graphics.drawLine(points[0].x, points[0].y, points[3].x, points[3].y);
 		}
-		graphics.fillPolygon(xs, ys, points.length);
 	}
 	
 	private Point[] realPoints(Trapezoid t, Trapezoid screen) {
@@ -142,6 +147,7 @@ public class Drawer extends JPanel {
 	}
 	
 	private static boolean isIntersect(Trapezoid a, Trapezoid b) {
+		//TODO: fix intersection check.
 		return isOneInAnother(a, b) || isOneInAnother(b, a);
 	}
 	

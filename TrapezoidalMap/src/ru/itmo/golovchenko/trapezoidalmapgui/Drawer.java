@@ -18,6 +18,10 @@ import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
 public class Drawer extends JPanel {
+	private static final Color ACTIVE_COLOR = Color.GREEN;
+	private static final Color HORISONTAL_COLOR = Color.RED;
+	private static final Color VERTICAL_COLOR = Color.BLUE;
+	
 	private Point point = new Point(0, 0);
 	private List<ChangeListener> pointChangedListeners = new ArrayList<>();
 	private List<ChangeListener> mapNodeChangedListeners = new ArrayList<>();
@@ -25,9 +29,7 @@ public class Drawer extends JPanel {
 	private int y = 200;
 	private TrapezoidalMap map = null;
 	private Point holdPoint  = null;
-	private static final Color ACTIVE_COLOR = Color.GREEN;
-	private static final Color HORISONTAL_COLOR = Color.RED;
-	private static final Color VERTICAL_COLOR = Color.BLUE;
+	private Point newLineStart = null;
 	
 	public Drawer() {
 		addMouseMotionListener(new MouseMotionListener() {
@@ -45,12 +47,26 @@ public class Drawer extends JPanel {
 			}
 		});
 		addMouseListener(new MouseAdapter() {
-			public void mouseReleased(MouseEvent arg0) {
-				holdPoint = null;
+			public void mouseReleased(MouseEvent eventArg) {
+				if (eventArg.getButton() == MouseEvent.BUTTON1) {
+					if (newLineStart != null) {
+						Line newLine = new Line(newLineStart, virtualCoordinate(eventArg.getPoint()));
+						if (map.isAddable(newLine)) {
+							map.add(newLine);
+						}
+					}
+					newLineStart = null;
+				} else {
+					holdPoint = null;
+				}
 			}
 			
-			public void mousePressed(MouseEvent arg0) {
-				holdPoint = arg0.getPoint();
+			public void mousePressed(MouseEvent eventArg) {
+				if (eventArg.getButton() == MouseEvent.BUTTON1) {
+					newLineStart = virtualCoordinate(eventArg.getPoint());
+				} else {
+					holdPoint = eventArg.getPoint();
+				}
 			}
 		});
 	}
@@ -80,18 +96,26 @@ public class Drawer extends JPanel {
 			drawTrapezoid(iter.next(), g, screen, false);
 		}
 
+		if (getMousePosition() != null && newLineStart != null) {
+			Line newLine = new Line(newLineStart, virtualCoordinate(getMousePosition()));
+			if (map.isAddable(newLine)) {
+				drawLine(newLine, g, false);
+			}
+			return;
+		}
+		
 		MapNode node = map.get(point);
 		if (node instanceof Trapezoid) {
 			drawTrapezoid((Trapezoid)node, g, screen, true);
 		} else if (node instanceof Line) {
-			drawLine((Line)node, g);
+			drawLine((Line)node, g, true);
 		} else {
 			drawPoint((Point)node, g);
 		}
 	}
 	
-	private void drawLine(Line line, Graphics graphics) {
-		graphics.setColor(ACTIVE_COLOR);
+	private void drawLine(Line line, Graphics graphics, boolean active) {
+		graphics.setColor(active ? ACTIVE_COLOR : HORISONTAL_COLOR);
 		Line realLine = new Line(realCoordinate(line.left), realCoordinate(line.right));
 		graphics.drawLine(realLine.left.x, realLine.left.y, realLine.right.x, realLine.right.y);
 		drawPoint(line.left, graphics);

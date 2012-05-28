@@ -27,7 +27,7 @@ public class Drawer extends JPanel {
 	private List<ChangeListener> mapNodeChangedListeners = new ArrayList<>();
 	private int x = -10;
 	private int y = 200;
-	private TrapezoidalMap map = null;
+	private TrapezoidalMap map = new TrapezoidalMap();
 	private Point holdPoint  = null;
 	private Point newLineStart = null;
 	
